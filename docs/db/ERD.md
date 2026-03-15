@@ -5,9 +5,9 @@
 ## 메타
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.1 |
+| **버전** | v1.2 |
 | **작성일** | 2026-03-15 |
-| **상태** | 초안 |
+| **상태** | 구현 완료 (Week 1) |
 | **DBMS** | PostgreSQL 15 (Supabase) |
 | **스키마** | `public` |
 | **문자셋** | UTF-8 (기본, 한국어/이모지 지원) |
@@ -17,6 +17,7 @@
 |------|------|------|
 | v1.0 | 2026-03-15 | 초안 작성 (stock, news_article, news_summary, notification_log) |
 | v1.1 | 2026-03-15 | MySQL → Supabase(PostgreSQL)로 전환. JSONB·TIMESTAMPTZ·CHECK 제약 적용 |
+| v1.2 | 2026-03-15 | Week 1 Flyway 마이그레이션 구현 완료. V1__init_schema.sql, V2__add_index.sql 적용 |
 
 ---
 

@@ -5,7 +5,7 @@
 ## 메타 정보
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.2 |
+| **버전** | v1.3 |
 | **작성일** | 2026-03-15 |
 | **상태** | 확정 |
 | **작성자** | 개인 프로젝트 |
@@ -16,6 +16,7 @@
 | v1.0 | 2026-03-15 | 초안 작성 |
 | v1.1 | 2026-03-15 | MySQL → Supabase(PostgreSQL)로 전환. MCP 전략 업데이트 |
 | v1.2 | 2026-03-15 | MVP 개발 계획 Supabase 반영, Week 4 배포 대상 수정 |
+| v1.3 | 2026-03-15 | Week 1 완료 반영 (모노레포, Spring Boot CRUD, CI, Next.js 세팅) |
 
 ---
 
@@ -174,12 +175,15 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 
 ## 10. MVP 개발 계획 (4주)
 
-### Week 1: BE 기초
-- [ ] 모노레포 구조 세팅 (api-server, ai-service, frontend, data-service)
-- [ ] Docker Compose (PostgreSQL + Redis) — 로컬 개발용 (프로덕션은 Supabase)
-- [ ] Spring Boot api-server: stock CRUD API (Supabase PostgreSQL 연결)
-- [ ] Flyway 마이그레이션 초기 스키마 (PostgreSQL 문법)
-- [ ] GitHub Actions CI 설정
+### Week 1: BE 기초 ✅ 완료
+- [x] 모노레포 구조 세팅 (api-server, ai-service, frontend, data-service)
+- [x] Docker Compose (PostgreSQL + Redis) — 로컬 개발용 (프로덕션은 Supabase)
+- [x] Spring Boot api-server: stock CRUD API (Supabase PostgreSQL 연결)
+- [x] Flyway 마이그레이션 초기 스키마 (PostgreSQL 문법)
+- [x] GitHub Actions CI 설정
+- [x] Next.js 15 프론트엔드 기본 세팅
+- [x] README.md 작성 및 GitHub 저장소 push
+- [x] GitHub frontend 서브모듈 문제 수정 (160000 → 일반 폴더)
 
 ### Week 2: AI 파이프라인
 - [ ] Node.js ai-service 세팅 (Express + 서비스 구조)
