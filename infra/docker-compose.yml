@@ -1,0 +1,43 @@
+version: "3.9"
+
+# 로컬 개발 전용 인프라
+# 프로덕션 DB: Supabase(PostgreSQL 15) 사용
+# 프로덕션 Redis: Railway Redis 사용
+
+services:
+  # PostgreSQL - Supabase 로컬 에뮬레이션
+  postgres:
+    image: postgres:15-alpine
+    container_name: financebot-postgres
+    environment:
+      POSTGRES_DB: financebot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d financebot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - 중복 방지 캐시 (TTL 전략)
+  redis:
+    image: redis:7-alpine
+    container_name: financebot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)",
+      "Bash(/c/Users/kik32/workspace/finance-bot-project/api-server/gradlew:*)",
+      "Bash(npx create-next-app@latest:*)"
+    ]
+  }
+}

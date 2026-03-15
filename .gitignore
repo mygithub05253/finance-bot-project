@@ -1,0 +1,52 @@
+# ================================
+# 환경변수 (절대 커밋 금지)
+# ================================
+.env
+.env.local
+.env.*.local
+
+# Spring Boot 로컬 전용 설정
+api-server/src/main/resources/application-local.yml
+api-server/src/main/resources/application-secret.yml
+
+# ================================
+# 빌드 결과물
+# ================================
+# Java / Gradle
+api-server/build/
+api-server/.gradle/
+*.class
+*.jar
+*.war
+
+# Node.js
+node_modules/
+ai-service/node_modules/
+frontend/node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Python
+data-service/__pycache__/
+data-service/*.pyc
+data-service/.venv/
+data-service/venv/
+data-service/.pytest_cache/
+*.egg-info/
+
+# ================================
+# IDE / OS
+# ================================
+.idea/
+.vscode/settings.json
+*.iml
+.DS_Store
+Thumbs.db
+
+# ================================
+# 로그
+# ================================
+*.log
+logs/
