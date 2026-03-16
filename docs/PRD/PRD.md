@@ -5,7 +5,7 @@
 ## 메타 정보
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.4 |
+| **버전** | v1.5 |
 | **작성일** | 2026-03-16 |
 | **상태** | 확정 |
 | **작성자** | 개인 프로젝트 |
@@ -18,6 +18,7 @@
 | v1.2 | 2026-03-15 | MVP 개발 계획 Supabase 반영, Week 4 배포 대상 수정 |
 | v1.3 | 2026-03-15 | Week 1 완료 반영 (모노레포, Spring Boot CRUD, CI, Next.js 세팅) |
 | v1.4 | 2026-03-16 | 개발 워크플로우 개선 (브랜치 전략, Velog 연계, Skill.md 가이드 강화) |
+| v1.5 | 2026-03-16 | Week 2 세분화: 6개 브랜치, ai-service 품질 이슈 개선 항목 명시, api-server news 도메인 추가 |
 
 ---
 
@@ -187,11 +188,37 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 - [x] GitHub frontend 서브모듈 문제 수정 (160000 → 일반 폴더)
 
 ### Week 2: AI 파이프라인
-- [ ] Node.js ai-service 세팅 (Express + 서비스 구조)
-- [ ] Perplexity API 연동 (perplexity.service.js)
-- [ ] n8n 워크플로우 구성 (스케줄 → 수집 → 저장)
-- [ ] Claude 수동 등록 분류 API (claude.service.js)
-- [ ] Redis 중복 방지 구현
+
+**브랜치: feature/week2-ai-service-setup**
+- [ ] parseJson.js 유틸 (마크다운 코드블록 제거 + JSON 추출, Claude/Perplexity 공통)
+- [ ] AppError 공통 에러 클래스 (statusCode 포함)
+- [ ] Redis 싱글톤 클라이언트 + 연결 실패 fallback
+- [ ] 컨트롤러 레이어 분리 (news.controller.js, notify.controller.js)
+- [ ] Jest 테스트 환경 구성 (jest.config.js)
+
+**브랜치: feature/week2-perplexity-api**
+- [ ] Perplexity 응답 파싱 개선 (parseJson 유틸 활용)
+- [ ] 재시도 로직 (최대 2회, 1초 대기)
+- [ ] 응답 유효성 검증 (title/url/summary 필수 필드) + 빈 배열 처리
+- [ ] perplexity.service.test.js 단위 테스트 작성
+
+**브랜치: feature/week2-claude-classify**
+- [ ] Claude 응답 파싱 개선 (parseJson 유틸 활용)
+- [ ] 응답 유효성 검증 (sentiment enum, stockId 타입 안전화)
+- [ ] claude.service.test.js 단위 테스트 작성
+
+**브랜치: feature/week2-redis-dedup**
+- [ ] dedup.service.js 분리 (isDuplicate, markAsProcessed)
+- [ ] 자동 수집 24h TTL / 수동 등록 7d TTL 상수화
+- [ ] Redis 연결 실패 시 fallback (경고 로그 후 중복 허용)
+- [ ] dedup.service.test.js 단위 테스트 작성
+
+**브랜치: feature/week2-n8n-workflow**
+- [ ] api-server: news 도메인 CRUD (NewsArticle + NewsSummary 엔티티, 서비스, 컨트롤러)
+- [ ] api-server: GET /api/v1/news (필터: stockId, date, category)
+- [ ] api-server: POST /api/v1/news (ai-service → api-server 저장 요청)
+- [ ] ai-service: POST /api/news/batch (n8n 일괄 수집 진입점, 중복방지 통합)
+- [ ] n8n 워크플로우 JSON 작성 (infra/n8n/workflows/daily-news-collection.json)
 
 ### Week 3: 알림 & 프론트엔드
 - [ ] 카카오톡 REST API 연동 (kakao.service.js)
