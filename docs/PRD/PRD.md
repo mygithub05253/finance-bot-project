@@ -5,7 +5,7 @@
 ## 메타 정보
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.4 |
+| **버전** | v1.6 |
 | **작성일** | 2026-03-16 |
 | **상태** | 확정 |
 | **작성자** | 개인 프로젝트 |
@@ -18,6 +18,8 @@
 | v1.2 | 2026-03-15 | MVP 개발 계획 Supabase 반영, Week 4 배포 대상 수정 |
 | v1.3 | 2026-03-15 | Week 1 완료 반영 (모노레포, Spring Boot CRUD, CI, Next.js 세팅) |
 | v1.4 | 2026-03-16 | 개발 워크플로우 개선 (브랜치 전략, Velog 연계, Skill.md 가이드 강화) |
+| v1.5 | 2026-03-16 | Week 2 세분화: 6개 브랜치, ai-service 품질 이슈 개선 항목 명시, api-server news 도메인 추가 |
+| v1.6 | 2026-03-16 | Week 2 완료 반영 — 5개 브랜치 구현 완료 (PR #4~#8) |
 
 ---
 
@@ -186,12 +188,13 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 - [x] README.md 작성 및 GitHub 저장소 push
 - [x] GitHub frontend 서브모듈 문제 수정 (160000 → 일반 폴더)
 
-### Week 2: AI 파이프라인
-- [ ] Node.js ai-service 세팅 (Express + 서비스 구조)
-- [ ] Perplexity API 연동 (perplexity.service.js)
-- [ ] n8n 워크플로우 구성 (스케줄 → 수집 → 저장)
-- [ ] Claude 수동 등록 분류 API (claude.service.js)
-- [ ] Redis 중복 방지 구현
+### Week 2: AI 파이프라인 ✅ 완료
+- [x] parseJson 유틸 (마크다운 코드블록 제거 + 객체/배열 파싱 우선순위 자동 결정)
+- [x] AppError 공통 에러 클래스 + Redis 싱글톤 + 컨트롤러 레이어 분리 (PR #4)
+- [x] Perplexity API 연동 — 파싱 개선, 재시도 로직, 유효성 검증, 단위 테스트 8개 (PR #5)
+- [x] Claude 분류 API — 파싱 개선, sentiment/category 유효값 검증, 단위 테스트 11개 (PR #6)
+- [x] Redis 중복 방지 (dedup.service) — 자동 24h/수동 7d TTL, fallback, 단위 테스트 10개 (PR #7)
+- [x] api-server news CRUD (NewsArticle+NewsSummary) + n8n 워크플로우 JSON (PR #8)
 
 ### Week 3: 알림 & 프론트엔드
 - [ ] 카카오톡 REST API 연동 (kakao.service.js)
