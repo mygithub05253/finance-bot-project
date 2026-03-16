@@ -31,9 +31,9 @@ dependencies {
   // PostgreSQL JDBC 드라이버
   runtimeOnly 'org.postgresql:postgresql'
 
-  // Flyway (PostgreSQL 전용)
+  // Flyway (PostgreSQL 전용) - Spring Boot 3.2.x → Flyway 10.x
   implementation 'org.flywaydb:flyway-core'
-  implementation 'org.flywaydb:flyway-database-postgresql'
+  implementation 'org.flywaydb:flyway-database-postgresql:10.11.0'
 
   // Redis (중복 방지 캐시)
   implementation 'org.springframework.boot:spring-boot-starter-data-redis'
