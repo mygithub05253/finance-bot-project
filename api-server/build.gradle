@@ -33,7 +33,7 @@ dependencies {
 
   // Flyway (PostgreSQL 전용)
   implementation 'org.flywaydb:flyway-core'
-  implementation 'org.flywaydb:flyway-database-postgresql'
+  implementation 'org.flywaydb:flyway-database-postgresql:10.11.0'
 
   // Redis (중복 방지 캐시)
   implementation 'org.springframework.boot:spring-boot-starter-data-redis'
