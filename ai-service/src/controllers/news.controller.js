@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { analyzeNews } = require('../services/claude.service');
 const { fetchStockNews } = require('../services/perplexity.service');
+const { isDuplicate, markAsProcessed } = require('../services/dedup.service');
 const config = require('../config');
 const AppError = require('../errors/AppError');
 
@@ -10,7 +11,7 @@ const AppError = require('../errors/AppError');
  * POST /api/news/register
  *
  * 플로우:
- * 1. Redis 중복 확인 (7일 TTL) — dedup.service 브랜치에서 통합 예정
+ * 1. Redis 중복 확인 (7일 TTL)
  * 2. 페이지 크롤링 (axios + cheerio)
  * 3. Claude 분류/요약
  * 4. api-server 저장
@@ -24,7 +25,12 @@ async function registerNews(req, res, next) {
   }
 
   try {
-    // 1. 뉴스 페이지 크롤링
+    // 1. 중복 URL 확인 (수동: 7일 TTL)
+    if (await isDuplicate(url, 'manual')) {
+      return next(AppError.conflict('이미 등록된 URL입니다. (7일 내 중복)'));
+    }
+
+    // 2. 뉴스 페이지 크롤링
     let pageResponse;
     try {
       pageResponse = await axios.get(url, {
@@ -69,6 +75,9 @@ async function registerNews(req, res, next) {
       { headers: { 'X-Internal-Secret': config.internalApiSecret } }
     );
 
+    // 5. 처리 완료 표시 (수동: 7일 TTL)
+    await markAsProcessed(url, 'manual');
+
     return res.json({ success: true, data: { title, ...analysis } });
   } catch (error) {
     return next(error);
@@ -106,6 +115,11 @@ async function batchCollect(req, res, next) {
 
         for (const item of newsItems) {
           try {
+            // Redis 중복 확인 (자동: 24h TTL)
+            if (await isDuplicate(item.url, 'auto')) {
+              continue;
+            }
+
             await axios.post(
               `${config.apiServerUrl}/api/v1/news`,
               {
@@ -122,6 +136,9 @@ async function batchCollect(req, res, next) {
               },
               { headers: { 'X-Internal-Secret': config.internalApiSecret } }
             );
+
+            // 처리 완료 표시 (자동: 24h TTL)
+            await markAsProcessed(item.url, 'auto');
             savedCount++;
           } catch (saveErr) {
             // URL 중복(409) 등 개별 저장 실패는 스킵
