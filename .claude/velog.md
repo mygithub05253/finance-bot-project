@@ -5,11 +5,41 @@
 
 ---
 
-## 포스팅 목록 (6편)
+## 브랜치 → Velog 연계 원칙
+
+각 feature 브랜치 작업이 `develop`에 머지된 후, 관련 내용을 Velog 초안에 반영합니다.
+
+```
+브랜치 작업 완료 → develop PR 머지
+    → 해당 포스팅 초안(docs/velog/XX-name.md) 업데이트
+    → 여러 브랜치가 모이면 최종 퇴고 후 Velog 업로드
+```
+
+### 포스팅 연계 맵
+| 브랜치 | 연계 포스팅 |
+|--------|------------|
+| `feature/week2-ai-service-setup` | #3 |
+| `feature/week2-perplexity-api` | #3 |
+| `feature/week2-n8n-workflow` | #3 |
+| `feature/week2-claude-classify` | #4 |
+| `feature/week2-redis-dedup` | #4 |
+| `feature/week3-kakao-api` | #5 |
+| `feature/week3-news-dashboard` | #5 |
+| `feature/week3-stock-management-ui` | #5 |
+| `feature/week3-url-registration-ui` | #5 |
+| `feature/week4-railway-deploy` | #6 |
+| `feature/week4-supabase-prod` | #6 |
+| `feature/week4-vercel-deploy` | #6 |
+| `feature/week4-n8n-cloud-setup` | #6 |
+
+---
+
+## 포스팅 목록
 
 ### #1 - 설계 편 ✅ 초안 완료
 **제목:** `[금융 뉴스 큐레이터 #1] 개인 투자 뉴스 자동화 설계 - Spring Boot + Node.js + n8n`
 **파일:** `docs/velog/01-design.md`
+**연계 브랜치:** N/A (초기 설계)
 
 **주요 내용:**
 - 페인포인트 정의 (뉴스 수동 탐색, 히스토리 관리 불가)
@@ -25,6 +55,7 @@
 ### #2 - Week 1 구현 편 ✅ 초안 완료
 **제목:** `[금융 뉴스 큐레이터 #2] 모노레포 + Spring Boot CRUD 구현기 - Supabase/Flyway/GitHub Actions`
 **파일:** `docs/velog/02-spring-boot-crud.md`
+**연계 브랜치:** N/A (Week 1 완료 기록)
 
 **주요 내용:**
 - 모노레포 디렉토리 구조 세팅 결정 이유
@@ -34,13 +65,17 @@
 - GitHub Actions 멀티 서비스 CI (api-server / ai-service / frontend 병렬)
 - 트러블슈팅: GitHub frontend 서브모듈(화살표) 문제 해결
 
-**태그:** `#SpringBoot` `#Flyway` `#GitHub Actions` `#Supabase` `#PostgreSQL`
+**태그:** `#SpringBoot` `#Flyway` `#GitHubActions` `#Supabase` `#PostgreSQL`
 
 ---
 
 ### #3 - Week 2-1 AI 수집 편 ⏳ 작업 예정
 **제목:** `[금융 뉴스 큐레이터 #3] Perplexity API로 뉴스 자동 수집 + n8n 워크플로우 구성`
 **파일:** `docs/velog/03-perplexity-n8n.md`
+**연계 브랜치:**
+- `feature/week2-ai-service-setup` → ai-service Express 구조 섹션
+- `feature/week2-perplexity-api` → Perplexity 연동 섹션
+- `feature/week2-n8n-workflow` → n8n 워크플로우 섹션
 
 **주요 내용:**
 - Perplexity API 선택 이유 (실시간 검색 + 출처 URL 자동 제공)
@@ -56,6 +91,9 @@
 ### #4 - Week 2-2 Claude + Redis 편 ⏳ 작업 예정
 **제목:** `[금융 뉴스 큐레이터 #4] Claude Haiku로 뉴스 분류 + Redis TTL 중복 방지 구현`
 **파일:** `docs/velog/04-claude-redis.md`
+**연계 브랜치:**
+- `feature/week2-claude-classify` → Claude 분류 섹션
+- `feature/week2-redis-dedup` → Redis TTL 섹션
 
 **주요 내용:**
 - Claude Haiku vs Sonnet 선택 이유 (3초 이내 응답 목표)
@@ -71,6 +109,11 @@
 ### #5 - Week 3 알림 & 대시보드 편 ⏳ 작업 예정
 **제목:** `[금융 뉴스 큐레이터 #5] 카카오톡 알림 연동 + Next.js 15 대시보드 구현`
 **파일:** `docs/velog/05-kakao-frontend.md`
+**연계 브랜치:**
+- `feature/week3-kakao-api` → 카카오톡 섹션
+- `feature/week3-news-dashboard` → 대시보드 섹션
+- `feature/week3-stock-management-ui` → 종목 관리 UI 섹션
+- `feature/week3-url-registration-ui` → URL 등록 폼 섹션
 
 **주요 내용:**
 - 카카오 REST API "나에게 보내기" 연동 삽질기 (UUID/토큰 발급 과정)
@@ -81,13 +124,18 @@
 - React Hook Form + Zod URL 등록 폼 구현
 - 트러블슈팅: 카카오 앱 권한 설정 누락 오류
 
-**태그:** `#카카오API` `#Next.js15` `#Zustand` `#AppRouter` `#금융자동화`
+**태그:** `#카카오API` `#Nextjs15` `#Zustand` `#AppRouter` `#금융자동화`
 
 ---
 
 ### #6 - Week 4 배포 + 회고 편 ⏳ 작업 예정
 **제목:** `[금융 뉴스 큐레이터 #6] Railway/Vercel 배포 완성 + 1주일 운영 회고`
 **파일:** `docs/velog/06-deploy-retrospect.md`
+**연계 브랜치:**
+- `feature/week4-railway-deploy` → Railway 배포 섹션
+- `feature/week4-supabase-prod` → Supabase 프로덕션 섹션
+- `feature/week4-vercel-deploy` → Vercel 배포 섹션
+- `feature/week4-n8n-cloud-setup` → n8n Cloud 섹션
 
 **주요 내용:**
 - Railway 멀티 서비스 배포 (api-server + ai-service + Redis)
