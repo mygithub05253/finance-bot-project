@@ -1,0 +1,168 @@
+{
+  "name": "Daily News Collection (07:00 KST)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 22 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger (22:00 UTC = 07:00 KST, 평일)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.AI_SERVICE_URL }}/api/news/batch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Internal-Secret",
+              "value": "={{ $env.INTERNAL_API_SECRET }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "batch-collect",
+      "name": "뉴스 배치 수집 (POST /api/news/batch)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-success",
+      "name": "수집 성공 여부 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.AI_SERVICE_URL }}/api/notify/daily",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Internal-Secret",
+              "value": "={{ $env.INTERNAL_API_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"accessToken\": \"{{ $env.KAKAO_ACCESS_TOKEN }}\",\n  \"date\": \"{{ $now.setZone('Asia/Seoul').toFormat('yyyy-MM-dd') }}\",\n  \"newsItems\": [],\n  \"autoCount\": {{ $json.saved }},\n  \"manualCount\": 0\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-kakao",
+      "name": "카카오톡 알림 발송",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 200]
+    },
+    {
+      "parameters": {
+        "message": "=뉴스 수집 실패: {{ $json.message ?? '알 수 없는 오류' }}",
+        "options": {}
+      },
+      "id": "error-log",
+      "name": "오류 로그",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [960, 420]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (22:00 UTC = 07:00 KST, 평일)": {
+      "main": [
+        [
+          {
+            "node": "뉴스 배치 수집 (POST /api/news/batch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "뉴스 배치 수집 (POST /api/news/batch)": {
+      "main": [
+        [
+          {
+            "node": "수집 성공 여부 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "수집 성공 여부 확인": {
+      "main": [
+        [
+          {
+            "node": "카카오톡 알림 발송",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "오류 로그",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": ""
+  },
+  "meta": {
+    "description": "매일 07:00 KST(평일) ai-service /api/news/batch를 호출하여 관심 종목 뉴스를 자동 수집하고 카카오톡으로 발송합니다."
+  }
+}
