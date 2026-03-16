@@ -1,5 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const config = require('../config');
+const { parseJson } = require('../utils/parseJson');
+const AppError = require('../errors/AppError');
 
 const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
 
@@ -8,6 +10,39 @@ const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
  * 수동 URL 등록 시 호출 (3초 이내 목표)
  */
 
+const VALID_SENTIMENTS = ['POSITIVE', 'NEUTRAL', 'NEGATIVE'];
+const VALID_CATEGORIES = ['실적', '규제', 'M&A', '인사', '시장전망', '기타'];
+
+/**
+ * Claude 응답에서 결과를 검증하고 정규화
+ * @param {Object} raw - parseJson으로 추출한 원시 객체
+ * @returns {{stockId: number|null, category: string, summary: string, sentiment: string, keywords: string[]}}
+ */
+function normalizeAnalysisResult(raw) {
+  // stockId: 정수 또는 null (문자열 "null", 0, undefined도 null로 처리)
+  let stockId = null;
+  if (raw.stockId !== null && raw.stockId !== undefined && raw.stockId !== 'null') {
+    const parsed = parseInt(raw.stockId, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      stockId = parsed;
+    }
+  }
+
+  // sentiment: POSITIVE/NEUTRAL/NEGATIVE 중 하나, 그 외엔 NEUTRAL로 fallback
+  const sentiment = VALID_SENTIMENTS.includes(raw.sentiment) ? raw.sentiment : 'NEUTRAL';
+
+  // category: 유효값 중 하나, 그 외엔 '기타'로 fallback
+  const category = VALID_CATEGORIES.includes(raw.category) ? raw.category : '기타';
+
+  // keywords: 배열이 아니거나 없으면 빈 배열로 처리
+  const keywords = Array.isArray(raw.keywords) ? raw.keywords.filter(k => typeof k === 'string') : [];
+
+  // summary: 문자열이어야 함
+  const summary = typeof raw.summary === 'string' ? raw.summary.trim() : '';
+
+  return { stockId, category, summary, sentiment, keywords };
+}
+
 /**
  * 뉴스 본문을 분석하여 종목 분류 + 카테고리 + 요약 + 감성 분석 반환
  * @param {string} newsContent - 뉴스 본문 텍스트
@@ -15,9 +50,13 @@ const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
  * @returns {Promise<{stockId: number|null, category: string, summary: string, sentiment: string, keywords: string[]}>}
  */
 async function analyzeNews(newsContent, stockList) {
-  const stockListText = stockList
-    .map(s => `- id: ${s.id}, ticker: ${s.ticker}, 종목명: ${s.name}`)
-    .join('\n');
+  if (!newsContent || typeof newsContent !== 'string') {
+    throw AppError.badRequest('뉴스 본문이 없거나 잘못된 형식입니다.');
+  }
+
+  const stockListText = stockList.length > 0
+    ? stockList.map(s => `- id: ${s.id}, ticker: ${s.ticker}, 종목명: ${s.name}`).join('\n')
+    : '(등록된 관심 종목 없음)';
 
   const prompt = `당신은 한국 금융 뉴스 분석 전문가입니다.
 아래 뉴스 본문을 분석하여 JSON 형식으로 응답해주세요.
@@ -50,8 +89,9 @@ ${newsContent}
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const responseText = message.content[0].text.trim();
-  return JSON.parse(responseText);
+  const responseText = message.content[0].text;
+  const raw = parseJson(responseText);
+  return normalizeAnalysisResult(raw);
 }
 
 module.exports = { analyzeNews };
