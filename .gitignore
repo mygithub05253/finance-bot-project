@@ -18,6 +18,8 @@ api-server/.gradle/
 *.class
 *.jar
 *.war
+# Gradle Wrapper jar는 예외 (CI 빌드에 필요)
+!api-server/gradle/wrapper/gradle-wrapper.jar
 
 # Node.js
 node_modules/
