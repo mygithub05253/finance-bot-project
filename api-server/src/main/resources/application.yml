@@ -29,6 +29,10 @@ spring:
 server:
   port: 8080
 
+# 내부 서비스 인증 (ai-service → api-server 호출 시 헤더 검증)
+internal:
+  secret: ${INTERNAL_API_SECRET:dev-secret}
+
 # 로깅
 logging:
   level:
