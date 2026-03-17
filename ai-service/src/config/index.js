@@ -12,11 +12,12 @@ const config = {
   perplexityApiKey: process.env.PERPLEXITY_API_KEY || '',
   claudeApiKey: process.env.CLAUDE_API_KEY || '',
   kakaoRestApiKey: process.env.KAKAO_REST_API_KEY || '',
-  kakaoTargetUuid: process.env.KAKAO_TARGET_UUID || '',
+  // 카카오 액세스 토큰은 n8n이 요청 시 직접 전달 (환경변수 저장 불필요)
 
   // 서비스 간 통신 보안
   internalApiSecret: process.env.INTERNAL_API_SECRET || '',
   apiServerUrl: process.env.API_SERVER_URL || 'http://localhost:8080',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
   // Redis
   redis: {
@@ -27,7 +28,7 @@ const config = {
 
 // 운영 환경에서는 필수 키 검증
 if (config.nodeEnv === 'production') {
-  const required = ['perplexityApiKey', 'claudeApiKey', 'kakaoRestApiKey', 'kakaoTargetUuid', 'internalApiSecret'];
+  const required = ['perplexityApiKey', 'claudeApiKey', 'kakaoRestApiKey', 'internalApiSecret'];
   for (const key of required) {
     if (!config[key]) {
       throw new Error(`필수 환경변수 누락: ${key}`);
