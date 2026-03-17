@@ -5,9 +5,9 @@
 ## 메타
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.1 |
-| **작성일** | 2026-03-15 |
-| **상태** | 종목 CRUD 구현 완료 (Week 1) |
+| **버전** | v1.2 |
+| **작성일** | 2026-03-17 |
+| **상태** | Week 3 완료 — 종목 CRUD + 뉴스 CRUD 구현 완료 |
 | **Base URL** | `/api/v1` |
 | **서비스** | Spring Boot 3.x (api-server) |
 | **포트** | 8080 (로컬) |
@@ -17,6 +17,7 @@
 |------|------|------|
 | v1.0 | 2026-03-15 | 초안 작성 |
 | v1.1 | 2026-03-15 | Week 1 완료: 종목 CRUD(GET/POST/PUT/DELETE), 내부 뉴스 저장 API 구현 |
+| v1.2 | 2026-03-17 | Week 3 완료: 뉴스 CRUD 실제 구현 반영 (평탄화 응답, 내부 인증 `POST /api/v1/news`) |
 
 ---
 
@@ -241,11 +242,11 @@ GET /api/v1/news/{id}
 
 ## 내부 API (Internal - ai-service 전용)
 
-> 모든 내부 API는 `X-Internal-Secret` 헤더 필수. 불일치 시 403 반환.
+> `POST /api/v1/news`는 `X-Internal-Secret` 헤더 필수. 불일치 시 400 반환.
 
 ### 1. 뉴스 저장 (ai-service → api-server)
 ```
-POST /api/v1/internal/news
+POST /api/v1/news
 X-Internal-Secret: {INTERNAL_API_SECRET}
 Content-Type: application/json
 ```
@@ -253,11 +254,13 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "title": "삼성전자 HBM3E 양산 본격화",
-  "url": "https://news.example.com/article/123",
-  "contentSnippet": "삼성전자가 HBM3E ...",
-  "sourceType": "AUTO",
-  "publishedAt": "2026-03-15T06:00:00+09:00",
+  "article": {
+    "title": "삼성전자 HBM3E 양산 본격화",
+    "url": "https://news.example.com/article/123",
+    "contentSnippet": "삼성전자가 HBM3E ...",
+    "sourceType": "AUTO",
+    "publishedAt": "2026-03-17T06:00:00+09:00"
+  },
   "summary": {
     "stockId": 1,
     "summary": "HBM3E 양산 본격화로 2분기 실적 개선 기대.",
@@ -268,7 +271,7 @@ Content-Type: application/json
 }
 ```
 
-**Response 201:** 저장된 뉴스 ID 반환
+**Response 201:** 평탄화된 NewsResponse 반환 (article + summary 병합)
 
 ---
 

@@ -5,18 +5,19 @@
 ## 메타
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.1 |
-| **작성일** | 2026-03-15 |
-| **상태** | 스켈레톤 구현 완료 (Week 1) / 핵심 기능 Week 2 예정 |
-| **Base URL** | `/ai/v1` |
+| **버전** | v1.2 |
+| **작성일** | 2026-03-17 |
+| **상태** | Week 3 완료 — 카카오톡 알림 포함 전체 엔드포인트 구현 완료 |
+| **Base URL** | `/api` |
 | **서비스** | Node.js Express (ai-service) |
-| **포트** | 3000 (로컬) |
+| **포트** | 3001 (로컬) |
 
 ### 변경 이력
 | 버전 | 날짜 | 내용 |
 |------|------|------|
 | v1.0 | 2026-03-15 | 초안 작성 |
 | v1.1 | 2026-03-15 | Week 1: Express 서버 구조, 라우팅, 내부 인증 미들웨어 구현 완료 |
+| v1.2 | 2026-03-17 | Week 3: 카카오톡 알림 API 추가, Base URL `/ai/v1` → `/api`로 수정, memo API URL 버그 수정 |
 
 ---
 
@@ -26,8 +27,7 @@
 ```json
 {
   "success": true,
-  "data": { },
-  "timestamp": "2026-03-15T07:00:00+09:00"
+  "data": { }
 }
 ```
 
@@ -38,8 +38,7 @@
   "error": {
     "code": "CRAWL_FAILED",
     "message": "페이지를 크롤링할 수 없습니다."
-  },
-  "timestamp": "2026-03-15T07:00:00+09:00"
+  }
 }
 ```
 
@@ -56,14 +55,14 @@
 
 ## 수동 뉴스 등록
 
-### POST /ai/v1/news/register
+### POST /api/news/register
 
 사용자가 URL을 입력하면 크롤링 → Claude 분류/요약 → api-server 저장까지 처리.
 
 **목표 응답 시간: 3초 이내**
 
 ```
-POST /ai/v1/news/register
+POST /api/news/register
 Content-Type: application/json
 ```
 
@@ -85,7 +84,7 @@ URL 수신
       - 카테고리 분류 (실적/규제/M&A/인사/기타)
       - 3-5줄 한국어 요약
       - 감성 분석 (POSITIVE/NEUTRAL/NEGATIVE)
-  → Spring Boot api-server에 저장 (POST /api/v1/internal/news)
+  → Spring Boot api-server에 저장 (POST /api/v1/news + X-Internal-Secret)
   → Redis 키 등록 (TTL 7일)
   → 결과 반환
 ```
@@ -95,40 +94,17 @@ URL 수신
 {
   "success": true,
   "data": {
-    "articleId": 42,
+    "id": 42,
     "title": "삼성전자 HBM3E 양산 본격화",
     "url": "https://news.example.com/article/123",
+    "sourceType": "MANUAL",
     "stockId": 1,
     "stockName": "삼성전자",
-    "ticker": "005930",
-    "summary": "HBM3E 양산 본격화로 2분기 실적 개선 기대. 엔비디아 공급 확대 예정.",
+    "stockTicker": "005930",
+    "summary": "HBM3E 양산 본격화로 2분기 실적 개선 기대.",
     "category": "실적",
     "sentiment": "POSITIVE",
-    "keywords": ["HBM3E", "반도체", "엔비디아"],
-    "processedAt": "2026-03-15T10:30:00+09:00"
-  }
-}
-```
-
-**Error 409 - 중복 URL:**
-```json
-{
-  "success": false,
-  "error": {
-    "code": "DUPLICATE_URL",
-    "message": "이미 등록된 URL입니다.",
-    "registeredAt": "2026-03-14T09:00:00+09:00"
-  }
-}
-```
-
-**Error 422 - 크롤링 실패:**
-```json
-{
-  "success": false,
-  "error": {
-    "code": "CRAWL_FAILED",
-    "message": "페이지에 접근할 수 없습니다. (로그인 필요 또는 봇 차단)"
+    "keywords": ["HBM3E", "반도체", "엔비디아"]
   }
 }
 ```
@@ -137,12 +113,12 @@ URL 수신
 
 ## 내부 배치 처리 (n8n 전용)
 
-### POST /ai/v1/internal/batch
+### POST /api/news/batch
 
 n8n 스케줄러가 매일 07:00 KST에 Perplexity 수집 결과를 전달하면 일괄 처리.
 
 ```
-POST /ai/v1/internal/batch
+POST /api/news/batch
 X-Internal-Secret: {INTERNAL_API_SECRET}
 Content-Type: application/json
 ```
@@ -150,7 +126,7 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "date": "2026-03-15",
+  "date": "2026-03-17",
   "articles": [
     {
       "stockId": 1,
@@ -158,22 +134,10 @@ Content-Type: application/json
       "title": "삼성전자 HBM3E 양산 본격화",
       "url": "https://news.example.com/article/123",
       "content": "삼성전자가 HBM3E 양산을 본격화하며...",
-      "publishedAt": "2026-03-15T06:00:00+09:00"
+      "publishedAt": "2026-03-17T06:00:00+09:00"
     }
   ]
 }
-```
-
-**처리 흐름:**
-```
-각 article에 대해:
-  → Redis 중복 확인 (news:auto:{stockId}:{date})
-  → 중복이면 스킵
-  → Claude API: 요약 + 카테고리 + 감성 분석
-  → api-server 저장
-  → Redis 키 등록 (TTL 24시간)
-
-모든 처리 완료 후 → 카카오톡 메시지 발송
 ```
 
 **Response 200:**
@@ -181,21 +145,85 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "date": "2026-03-15",
+    "date": "2026-03-17",
     "totalReceived": 10,
     "savedCount": 8,
     "skippedCount": 2,
     "kakaoSent": true,
-    "processedAt": "2026-03-15T07:08:00+09:00"
+    "processedAt": "2026-03-17T07:08:00+09:00"
   }
 }
 ```
 
 ---
 
+## 카카오톡 일일 알림
+
+### POST /api/notify/daily
+
+n8n 스케줄러가 배치 처리 완료 후 카카오톡 알림 발송을 요청.
+
+```
+POST /api/notify/daily
+X-Internal-Secret: {INTERNAL_API_SECRET}
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "accessToken": "kakao_access_token_here",
+  "date": "2026-03-17",
+  "newsItems": [
+    {
+      "ticker": "005930",
+      "name": "삼성전자",
+      "summary": "HBM3E 양산 본격화로 2분기 실적 개선 기대.",
+      "url": "https://news.example.com/article/123"
+    }
+  ],
+  "autoCount": 5,
+  "manualCount": 2
+}
+```
+
+**처리 흐름:**
+```
+accessToken, date, newsItems 검증
+  → formatDailyMessage() 메시지 포맷팅 (80자 제한, 이모지 포함)
+  → POST https://kapi.kakao.com/v2/api/talk/memo/default/send
+  → 성공 시 { success: true, message: "카카오톡 발송 완료 (7건)" } 반환
+```
+
+**메시지 형식:**
+```
+📰 [2026-03-17] 오늘의 금융 뉴스
+
+📊 삼성전자 (005930)
+  HBM3E 양산 본격화로 2분기 실적 개선 기대.
+  출처: https://news.example.com/...
+─────────────────
+자동 5건 | 수동 2건
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "message": "카카오톡 발송 완료 (7건)"
+}
+```
+
+**참고:**
+- 카카오 액세스 토큰은 n8n이 요청 시 직접 전달
+- `나에게 보내기` API 사용 (`/v2/api/talk/memo/default/send`)
+- 1,000자 제한: 종목별 요약 80자 자동 截断
+
+---
+
 ## 헬스 체크
 
-### GET /ai/v1/health
+### GET /api/health
 
 Railway 및 n8n에서 서비스 상태 확인용.
 
@@ -204,11 +232,6 @@ Railway 및 n8n에서 서비스 상태 확인용.
 {
   "status": "ok",
   "service": "ai-service",
-  "version": "1.0.0",
-  "timestamp": "2026-03-15T07:00:00+09:00",
-  "dependencies": {
-    "apiServer": "ok",
-    "redis": "ok"
-  }
+  "version": "1.0.0"
 }
 ```

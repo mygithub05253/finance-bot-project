@@ -20,6 +20,7 @@
 | v1.4 | 2026-03-16 | 개발 워크플로우 개선 (브랜치 전략, Velog 연계, Skill.md 가이드 강화) |
 | v1.5 | 2026-03-16 | Week 2 세분화: 6개 브랜치, ai-service 품질 이슈 개선 항목 명시, api-server news 도메인 추가 |
 | v1.6 | 2026-03-16 | Week 2 완료 반영 — 5개 브랜치 구현 완료 (PR #4~#8) |
+| v1.7 | 2026-03-17 | Week 3 완료 반영 — 5개 브랜치 구현 완료 (PR #15~#19), CI 버그 수정 포함 |
 
 ---
 
@@ -196,12 +197,12 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 - [x] Redis 중복 방지 (dedup.service) — 자동 24h/수동 7d TTL, fallback, 단위 테스트 10개 (PR #7)
 - [x] api-server news CRUD (NewsArticle+NewsSummary) + n8n 워크플로우 JSON (PR #8)
 
-### Week 3: 알림 & 프론트엔드
-- [ ] 카카오톡 REST API 연동 (kakao.service.js)
-- [ ] 카카오톡 메시지 포맷 구현
-- [ ] Next.js 대시보드 (뉴스 카드 목록)
-- [ ] 종목 관리 페이지
-- [ ] 수동 URL 등록 UI
+### Week 3: 알림 & 프론트엔드 ✅ 완료
+- [x] 카카오톡 REST API 수정 (memo API URL 버그 수정 + 테스트 13개) (PR #15)
+- [x] api-server News CRUD (NewsArticle + NewsSummary + 내부 인증) (PR #16)
+- [x] Next.js 15 기반 설정 (shadcn/ui 스타일, Zustand, TanStack Query, 타입 정의) (PR #17)
+- [x] 뉴스 대시보드 (카드 목록, 필터, 스켈레톤, 상세 페이지) (PR #18)
+- [x] 종목 관리 페이지 + 수동 URL 등록 UI (3초 이내 결과 표시) (PR #19)
 
 ### Week 4: 배포 & 검증
 - [ ] Railway 배포 (api-server + ai-service + Redis)
