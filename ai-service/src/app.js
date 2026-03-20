@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors');
 const morgan = require('morgan');
 const config = require('./config');
 const { connect: connectRedis, disconnect: disconnectRedis } = require('./config/redis');
@@ -10,6 +11,14 @@ const newsRoutes = require('./routes/news.routes');
 const notifyRoutes = require('./routes/notify.routes');
 
 const app = express();
+
+// CORS — 프론트엔드(Next.js)에서 ai-service 직접 호출 허용
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Internal-Secret'],
+}));
 
 // 미들웨어
 app.use(express.json());
