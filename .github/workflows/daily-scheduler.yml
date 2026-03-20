@@ -1,0 +1,74 @@
+name: 일일 뉴스 수집 스케줄러
+
+# n8n Cloud 대체: GitHub Actions Cron으로 매일 07:00 KST 자동 실행
+on:
+  schedule:
+    - cron: '0 22 * * *'   # 22:00 UTC = 07:07 KST (약간 여유)
+  workflow_dispatch:         # 수동 실행 (테스트 또는 긴급 발송용)
+    inputs:
+      skip_collection:
+        description: '뉴스 수집 건너뛰기 (카카오톡 발송만 실행)'
+        required: false
+        default: 'false'
+
+jobs:
+  daily-news:
+    name: 뉴스 수집 및 카카오톡 발송
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ──────────────────────────────────────────
+      # Step 1: 뉴스 배치 수집 (Perplexity API)
+      # ──────────────────────────────────────────
+      - name: 뉴스 배치 수집
+        if: github.event.inputs.skip_collection != 'true'
+        run: |
+          echo "▶ 뉴스 배치 수집 시작..."
+          HTTP_STATUS=$(curl -s -o /tmp/batch_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.AI_SERVICE_URL }}/api/news/batch" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_API_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60)
+
+          echo "HTTP 상태: $HTTP_STATUS"
+          echo "응답: $(cat /tmp/batch_response.json)"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ 배치 수집 실패 (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ 뉴스 배치 수집 완료"
+
+      # ──────────────────────────────────────────
+      # Step 2: 카카오톡 일일 발송
+      # ──────────────────────────────────────────
+      - name: 카카오톡 일일 발송
+        run: |
+          echo "▶ 카카오톡 발송 시작..."
+          HTTP_STATUS=$(curl -s -o /tmp/notify_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.AI_SERVICE_URL }}/api/notify/daily" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_API_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 30)
+
+          echo "HTTP 상태: $HTTP_STATUS"
+          echo "응답: $(cat /tmp/notify_response.json)"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ 카카오톡 발송 실패 (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ 카카오톡 발송 완료"
+
+      # ──────────────────────────────────────────
+      # Step 3: 실행 결과 요약
+      # ──────────────────────────────────────────
+      - name: 실행 결과 요약
+        if: always()
+        run: |
+          echo "=============================="
+          echo " 일일 스케줄러 실행 완료"
+          echo " 실행 시각: $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          echo " KST 기준: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S KST')"
+          echo "=============================="
