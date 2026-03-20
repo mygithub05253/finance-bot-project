@@ -205,10 +205,10 @@ jobs:
 - **Flyway** - 안전한 스키마 버전 관리
 - **Claude Haiku** - 3초 이내 분류/요약 속도 우선
 
-다음 포스팅에서는 실제 Perplexity + Claude API 연동과 n8n 워크플로우 구성을 다루겠습니다.
+다음 포스팅에서는 **Spring Boot api-server** 구현 — 종목 CRUD, Flyway 마이그레이션, PostgreSQL 연결을 다루겠습니다.
 
 **GitHub 저장소:** https://github.com/mygithub05253/finance-bot-project
 
 ---
 
-*다음 편 예고: [#2] Perplexity + Claude API 연동기 - 뉴스 자동분류 구현*
+*다음 편 예고: [#2] Spring Boot api-server CRUD — 종목 관리 API + Flyway 마이그레이션*

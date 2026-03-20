@@ -7,7 +7,7 @@
 
 ## 들어가며
 
-Week 2에서 AI 파이프라인(Perplexity, Claude, Redis)을 완성했다면, Week 3는 그 결과물을 **눈에 보이게** 만드는 주간이었다. 두 가지 큰 목표가 있었다:
+Week 2에서 AI 파이프라인(Perplexity, Claude, Redis)을 완성하고([#3 참고](./03-ai-pipeline.md)), [#4에서 다룬 CI/CD 삽질기](./04-ci-cd-pipeline.md)를 거쳐 드디어 Week 3다. 이번 주의 목표는 그 결과물을 **눈에 보이게** 만드는 것으로, 두 가지였다:
 
 1. **카카오톡 알림**: 매일 아침 수집된 뉴스를 카카오톡으로 받아보기
 2. **Next.js 대시보드**: 뉴스 카드 목록, 종목 관리, 수동 URL 등록 UI

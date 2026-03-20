@@ -278,10 +278,10 @@ Week 1 완료 후 GitHub 저장소 상태:
 
 Week 1에서 가장 많이 배운 점은 **PostgreSQL과 MySQL의 문법 차이**입니다. `AUTO_INCREMENT` → `GENERATED ALWAYS AS IDENTITY`, `DATETIME` → `TIMESTAMPTZ`, `TEXT` 기반의 `JSONB`... 처음엔 낯설지만 JSONB의 GIN 인덱스는 키워드 검색에서 강력한 성능을 보여줄 것으로 기대합니다.
 
-다음 편에서는 Perplexity API로 뉴스를 자동 수집하고 n8n 워크플로우를 구성하는 과정을 다루겠습니다.
+다음 편에서는 **AI 파이프라인 구축** — Perplexity 뉴스 수집, Claude 분류, Redis 중복 방지, n8n 워크플로우를 다루겠습니다.
 
 **GitHub 저장소:** https://github.com/mygithub05253/finance-bot-project
 
 ---
 
-*다음 편 예고: [#3] Perplexity API 연동 + n8n 워크플로우 구성 - 뉴스 자동 수집 파이프라인 구축*
+*다음 편 예고: [#3] Week 2 AI 파이프라인 — Perplexity + Claude + Redis + n8n으로 자동 뉴스 수집*
