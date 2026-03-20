@@ -3,13 +3,18 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://db.${SUPABASE_PROJECT_REF}.supabase.co:5432/postgres
+    # Supabase Transaction Pooler (포트 6543) — Flyway는 Session 모드(5432) 필요
+    # Flyway 마이그레이션용 직접 연결: jdbc:postgresql://db.{ref}.supabase.co:5432/postgres
+    url: jdbc:postgresql://db.${SUPABASE_PROJECT_REF}.supabase.co:5432/postgres?sslmode=require
     username: postgres
     password: ${SUPABASE_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 5          # Supabase 무료 플랜 연결 수 제한
+      maximum-pool-size: 5          # Supabase 무료 플랜 연결 수 제한 (최대 60)
+      minimum-idle: 1               # 유휴 연결 최소 유지
       connection-timeout: 30000
+      idle-timeout: 600000          # 10분 유휴 후 반환
+      max-lifetime: 1800000         # 30분 후 강제 갱신 (Supabase 세션 만료 대비)
 
   data:
     redis:
