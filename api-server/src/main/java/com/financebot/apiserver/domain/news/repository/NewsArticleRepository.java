@@ -22,14 +22,29 @@ public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> 
    * - category: 카테고리 필터 (null이면 전체)
    * - fromDate: 특정 날짜 이후 뉴스만 필터 (null이면 전체)
    */
-  @Query("""
-      SELECT a FROM NewsArticle a
-      LEFT JOIN NewsSummary s ON s.article = a
-      WHERE (:stockId IS NULL OR s.stock.id = :stockId)
-        AND (:category IS NULL OR s.category = :category)
-        AND (:fromDate IS NULL OR a.createdAt >= :fromDate)
-      ORDER BY a.createdAt DESC
-      """)
+  /**
+   * 뉴스 목록 조회 (Native SQL — PostgreSQL null 파라미터 타입 추론 문제 우회)
+   * `:stockId IS NULL` 패턴은 PostgreSQL JDBC에서 타입 불명 오류를 유발하므로
+   * CAST(:param AS type) IS NULL 방식으로 명시적 타입 지정
+   */
+  @Query(
+      value = """
+          SELECT na.* FROM news_article na
+          LEFT JOIN news_summary ns ON ns.article_id = na.id
+          WHERE (CAST(:stockId AS BIGINT) IS NULL OR ns.stock_id = :stockId)
+            AND (CAST(:category AS TEXT) IS NULL OR ns.category = :category)
+            AND (CAST(:fromDate AS TIMESTAMPTZ) IS NULL OR na.created_at >= :fromDate)
+          ORDER BY na.created_at DESC
+          """,
+      countQuery = """
+          SELECT COUNT(na.id) FROM news_article na
+          LEFT JOIN news_summary ns ON ns.article_id = na.id
+          WHERE (CAST(:stockId AS BIGINT) IS NULL OR ns.stock_id = :stockId)
+            AND (CAST(:category AS TEXT) IS NULL OR ns.category = :category)
+            AND (CAST(:fromDate AS TIMESTAMPTZ) IS NULL OR na.created_at >= :fromDate)
+          """,
+      nativeQuery = true
+  )
   Page<NewsArticle> findAllWithFilter(
       @Param("stockId") Long stockId,
       @Param("category") String category,

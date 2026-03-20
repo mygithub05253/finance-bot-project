@@ -87,5 +87,5 @@ jobs:
       - name: Next.js 빌드 검증
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:8080
-          NEXT_PUBLIC_AI_SERVICE_URL: http://localhost:3000
+          NEXT_PUBLIC_API_SERVER_URL: http://localhost:8080
+          NEXT_PUBLIC_AI_SERVICE_URL: http://localhost:3001
