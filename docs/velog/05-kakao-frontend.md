@@ -307,7 +307,7 @@ Week 3에서 완성된 것들:
 - ✅ 뉴스 대시보드 (카드, 필터, 스켈레톤, 상세 페이지)
 - ✅ 종목 관리 + 수동 URL 등록 UI
 
-다음 Week 4에서는 드디어 **실제 배포**다:
+다음 [#6 Railway + Vercel + n8n 배포기](./06-week4-deploy.md)에서는 드디어 **실제 배포**다:
 - Railway에 api-server + ai-service + Redis 배포
 - Supabase 프로덕션 DB 연결
 - Vercel에 Next.js 배포
