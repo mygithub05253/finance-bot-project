@@ -5,7 +5,7 @@
 ## 메타 정보
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.8 |
+| **버전** | v1.9 |
 | **작성일** | 2026-03-20 |
 | **상태** | 확정 |
 | **작성자** | 개인 프로젝트 |
@@ -22,6 +22,7 @@
 | v1.6 | 2026-03-16 | Week 2 완료 반영 — 5개 브랜치 구현 완료 (PR #4~#8) |
 | v1.7 | 2026-03-17 | Week 3 완료 반영 — 5개 브랜치 구현 완료 (PR #15~#19), CI 버그 수정 포함 |
 | v1.8 | 2026-03-20 | Week 3 후속 작업 반영 — Velog #4 추가, API 연결 버그 수정, Week 4 세분화 |
+| v1.9 | 2026-03-20 | Week 4 배포 준비 완료 반영 — Dockerfile, Supabase SSL, n8n 워크플로우, Vercel 설정, 모니터링 체크리스트, Velog #6 초안 |
 
 ---
 
@@ -207,38 +208,42 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 - [x] Velog #4 CI/CD 파이프라인 삽질기 작성 + 시리즈 링크 정비 (PR #21)
 - [x] API 연결 버그 수정 (CORS, Flyway 버전, PostgreSQL null 타입 오류) (PR #22)
 
-### Week 4: 배포 & 검증 (세분화)
+### Week 4: 배포 & 검증 ✅ 코드/설정 준비 완료 (클라우드 배포는 별도 진행)
 
-**브랜치: `feature/week4-railway-deploy`**
-- [ ] api-server Dockerfile 작성 (multi-stage build, JAR 실행)
-- [ ] ai-service Dockerfile 작성 (Node.js Alpine)
-- [ ] Railway 프로젝트 생성 + api-server / ai-service 서비스 배포
-- [ ] Railway Redis add-on 연결 + 환경변수 등록
-- [ ] api-server `application-prod.yml` 환경변수 매핑 확인
+> **참고**: 아래 항목 중 ✅는 코드/설정 파일 준비 완료, ⏳는 실제 클라우드 계정에서 직접 진행 필요
 
-**브랜치: `feature/week4-supabase-prod`**
-- [ ] Supabase 프로젝트 생성 (PostgreSQL 15)
-- [ ] Railway api-server에 Supabase DB URL 환경변수 등록
-- [ ] 프로덕션 Flyway 마이그레이션 자동 실행 확인 (V1~V2)
-- [ ] Supabase Studio에서 테이블 생성 확인
+**브랜치: `feature/week4-railway-deploy`** (PR #24 ✅ 머지)
+- [x] api-server Dockerfile 작성 (multi-stage build, JDK21 → JRE21-alpine, non-root)
+- [x] ai-service Dockerfile 작성 (node:20-alpine, non-root)
+- [x] `.dockerignore` 각 서비스 생성
+- [x] `docs/deploy/railway-guide.md` 환경변수 목록 + 배포 단계 가이드
+- [x] 로컬 Docker 빌드 성공 확인 (`docker build` exit code 0)
+- ⏳ Railway 프로젝트 생성 + api-server / ai-service 실제 배포
 
-**브랜치: `feature/week4-vercel-deploy`**
-- [ ] Vercel 프로젝트 생성 + GitHub 연동
-- [ ] 환경변수 설정: `NEXT_PUBLIC_API_SERVER_URL`, `NEXT_PUBLIC_AI_SERVICE_URL` (Railway URL)
-- [ ] 커스텀 도메인 또는 Vercel 기본 도메인으로 접근 확인
-- [ ] PRD `카카오톡 메시지 포맷`의 `frontendUrl` 업데이트
+**브랜치: `feature/week4-supabase-prod`** (PR #25 ✅ 머지)
+- [x] `application-prod.yml` SSL(`sslmode=require`) + HikariCP 안정성 옵션 추가
+- [x] `docs/deploy/supabase-guide.md` 설정 가이드 (프로젝트 생성 ~ Flyway 확인)
+- ⏳ Supabase 프로젝트 생성 + Railway 환경변수 등록
+- ⏳ 프로덕션 Flyway 마이그레이션 자동 실행 확인
 
-**브랜치: `feature/week4-n8n-cloud`**
-- [ ] n8n Cloud 계정 생성 + 워크플로우 임포트 (`infra/n8n/workflows/daily-news-collection.json`)
-- [ ] HTTP Request 노드 URL → Railway ai-service URL로 수정
-- [ ] 카카오 OAuth2 액세스 토큰 발급 + n8n Credentials 등록
-- [ ] 22:00 UTC (07:00 KST) 스케줄러 실행 테스트 1회
-- [ ] 카카오톡 수신 확인
+**브랜치: `feature/week4-vercel-deploy`** (PR #26 ✅ 머지)
+- [x] `next.config.ts`: `output: 'standalone'` + 보안 헤더 추가
+- [x] `frontend/Dockerfile` 생성 (Railway 대안 배포용)
+- [x] `docs/deploy/vercel-guide.md` 배포 가이드 (Root Directory, 환경변수, CORS 업데이트)
+- [x] `npm run build` 성공 확인 (standalone 빌드 포함)
+- ⏳ Vercel 프로젝트 생성 + 환경변수(Railway URL) 설정
 
-**브랜치: `docs/week4-monitoring`**
-- [ ] 1주일 운영 후 KPI 지표 확인 (자동 발송 95%, 중복 0건, 처리 3초 이내)
-- [ ] `notification_log` 테이블 SUCCESS/FAIL 집계 쿼리 작성
-- [ ] Velog #6 포스팅 초안 (배포 완성 + 1주일 운영기)
+**브랜치: `feature/week4-n8n-cloud`** (PR #27 ✅ 머지)
+- [x] `infra/n8n/workflows/daily-news-collection.json` 워크플로우 JSON 생성
+  (스케줄 22:00 UTC → 배치 수집 → 뉴스 조회 → 포맷팅 → 카카오 발송)
+- [x] `docs/deploy/n8n-cloud-guide.md` 설정 가이드 (Credentials, 카카오 토큰 발급, 갱신 전략)
+- ⏳ n8n Cloud 임포트 + Credentials 설정 + 실제 카카오톡 수신 확인
+
+**브랜치: `docs/week4-monitoring`** (PR #28 ✅ 머지)
+- [x] `docs/monitoring/kpi-checklist.md`: KPI 지표 + DB 집계 SQL + 1주일 체크리스트
+- [x] `docs/velog/06-week4-deploy.md`: Velog #6 초안 (배포기)
+- ⏳ 실제 배포 후 Day 1~7 체크리스트 완료
+- ⏳ Velog #6 게시 후 URL 업데이트
 
 ---
 
