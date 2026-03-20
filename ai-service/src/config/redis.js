@@ -11,21 +11,23 @@ let isConnected = false;
 
 function getClient() {
   if (!redisClient) {
-    redisClient = new Redis({
-      host: config.redis.host,
-      port: config.redis.port,
+    // Railway는 REDIS_URL(redis://...) 형식, 로컬은 host/port 방식
+    const baseOptions = {
       lazyConnect: true,
       connectTimeout: 5000,
-      // 자동 재연결 설정: 최대 3회
       maxRetriesPerRequest: 1,
       retryStrategy: (times) => {
         if (times > 3) {
           console.warn('[Redis] 재연결 시도 한도 초과. Redis 없이 동작합니다.');
-          return null; // 재연결 중단
+          return null;
         }
         return Math.min(times * 500, 2000);
       },
-    });
+    };
+
+    redisClient = process.env.REDIS_URL
+      ? new Redis(process.env.REDIS_URL, baseOptions)
+      : new Redis({ host: config.redis.host, port: config.redis.port, ...baseOptions });
 
     redisClient.on('connect', () => {
       isConnected = true;

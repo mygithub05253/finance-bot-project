@@ -18,8 +18,8 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
+      # Railway Redis는 REDIS_URL (redis://default:pw@host:port) 형식으로 제공
+      url: ${REDIS_URL:redis://localhost:6379}
 
   jpa:
     show-sql: false

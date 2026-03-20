@@ -12,7 +12,8 @@ const config = {
   perplexityApiKey: process.env.PERPLEXITY_API_KEY || '',
   claudeApiKey: process.env.CLAUDE_API_KEY || '',
   kakaoRestApiKey: process.env.KAKAO_REST_API_KEY || '',
-  // 카카오 액세스 토큰은 n8n이 요청 시 직접 전달 (환경변수 저장 불필요)
+  // 카카오 액세스 토큰 (Railway 환경변수에 저장, 만료 시 갱신 후 재배포)
+  kakaoAccessToken: process.env.KAKAO_ACCESS_TOKEN || '',
 
   // 서비스 간 통신 보안
   internalApiSecret: process.env.INTERNAL_API_SECRET || '',
@@ -28,7 +29,7 @@ const config = {
 
 // 운영 환경에서는 필수 키 검증
 if (config.nodeEnv === 'production') {
-  const required = ['perplexityApiKey', 'claudeApiKey', 'kakaoRestApiKey', 'internalApiSecret'];
+  const required = ['perplexityApiKey', 'claudeApiKey', 'kakaoRestApiKey', 'kakaoAccessToken', 'internalApiSecret'];
   for (const key of required) {
     if (!config[key]) {
       throw new Error(`필수 환경변수 누락: ${key}`);
