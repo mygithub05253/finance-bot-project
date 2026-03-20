@@ -5,8 +5,8 @@
 ## 메타 정보
 | 항목 | 내용 |
 |------|------|
-| **버전** | v1.6 |
-| **작성일** | 2026-03-16 |
+| **버전** | v1.8 |
+| **작성일** | 2026-03-20 |
 | **상태** | 확정 |
 | **작성자** | 개인 프로젝트 |
 
@@ -21,6 +21,7 @@
 | v1.5 | 2026-03-16 | Week 2 세분화: 6개 브랜치, ai-service 품질 이슈 개선 항목 명시, api-server news 도메인 추가 |
 | v1.6 | 2026-03-16 | Week 2 완료 반영 — 5개 브랜치 구현 완료 (PR #4~#8) |
 | v1.7 | 2026-03-17 | Week 3 완료 반영 — 5개 브랜치 구현 완료 (PR #15~#19), CI 버그 수정 포함 |
+| v1.8 | 2026-03-20 | Week 3 후속 작업 반영 — Velog #4 추가, API 연결 버그 수정, Week 4 세분화 |
 
 ---
 
@@ -203,14 +204,41 @@ Redis: news:manual:{urlHash} 키 등록 (TTL 7일)
 - [x] Next.js 15 기반 설정 (shadcn/ui 스타일, Zustand, TanStack Query, 타입 정의) (PR #17)
 - [x] 뉴스 대시보드 (카드 목록, 필터, 스켈레톤, 상세 페이지) (PR #18)
 - [x] 종목 관리 페이지 + 수동 URL 등록 UI (3초 이내 결과 표시) (PR #19)
+- [x] Velog #4 CI/CD 파이프라인 삽질기 작성 + 시리즈 링크 정비 (PR #21)
+- [x] API 연결 버그 수정 (CORS, Flyway 버전, PostgreSQL null 타입 오류) (PR #22)
 
-### Week 4: 배포 & 검증
-- [ ] Railway 배포 (api-server + ai-service + Redis)
-- [ ] Supabase 프로덕션 DB 연결 (Railway 환경변수 등록)
-- [ ] Vercel 프론트엔드 배포
-- [ ] n8n Cloud 워크플로우 임포트 및 실 운영
-- [ ] 1주일 모니터링 (KPI 지표 확인)
-- [ ] Velog 포스팅 #3 (배포 완성 편) 작성
+### Week 4: 배포 & 검증 (세분화)
+
+**브랜치: `feature/week4-railway-deploy`**
+- [ ] api-server Dockerfile 작성 (multi-stage build, JAR 실행)
+- [ ] ai-service Dockerfile 작성 (Node.js Alpine)
+- [ ] Railway 프로젝트 생성 + api-server / ai-service 서비스 배포
+- [ ] Railway Redis add-on 연결 + 환경변수 등록
+- [ ] api-server `application-prod.yml` 환경변수 매핑 확인
+
+**브랜치: `feature/week4-supabase-prod`**
+- [ ] Supabase 프로젝트 생성 (PostgreSQL 15)
+- [ ] Railway api-server에 Supabase DB URL 환경변수 등록
+- [ ] 프로덕션 Flyway 마이그레이션 자동 실행 확인 (V1~V2)
+- [ ] Supabase Studio에서 테이블 생성 확인
+
+**브랜치: `feature/week4-vercel-deploy`**
+- [ ] Vercel 프로젝트 생성 + GitHub 연동
+- [ ] 환경변수 설정: `NEXT_PUBLIC_API_SERVER_URL`, `NEXT_PUBLIC_AI_SERVICE_URL` (Railway URL)
+- [ ] 커스텀 도메인 또는 Vercel 기본 도메인으로 접근 확인
+- [ ] PRD `카카오톡 메시지 포맷`의 `frontendUrl` 업데이트
+
+**브랜치: `feature/week4-n8n-cloud`**
+- [ ] n8n Cloud 계정 생성 + 워크플로우 임포트 (`infra/n8n/workflows/daily-news-collection.json`)
+- [ ] HTTP Request 노드 URL → Railway ai-service URL로 수정
+- [ ] 카카오 OAuth2 액세스 토큰 발급 + n8n Credentials 등록
+- [ ] 22:00 UTC (07:00 KST) 스케줄러 실행 테스트 1회
+- [ ] 카카오톡 수신 확인
+
+**브랜치: `docs/week4-monitoring`**
+- [ ] 1주일 운영 후 KPI 지표 확인 (자동 발송 95%, 중복 0건, 처리 3초 이내)
+- [ ] `notification_log` 테이블 SUCCESS/FAIL 집계 쿼리 작성
+- [ ] Velog #6 포스팅 초안 (배포 완성 + 1주일 운영기)
 
 ---
 
